@@ -40,6 +40,8 @@ contract FlightSuretyData {
 
     mapping(address => bool) private authorizedCallers;
 
+    mapping(bytes32 => uint8) flightStatuses;               //a mapping to store the flight status
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -63,6 +65,7 @@ contract FlightSuretyData {
     event PayoutMade(address recipient, uint256 payoutAmount);
     event AirlineFunded(address airline, uint256 fundingAmount);
     event CallerAuthorized(address caller);
+    event FlightStatusUpdated(bytes32 flightKey, uint8 statusCode);
 
 
     /********************************************************************************************/
@@ -137,6 +140,16 @@ contract FlightSuretyData {
 
     function getVoteCount(address airlineAddress) internal view returns (uint256) {
         return airlineVotes[airlineAddress].voteCount;
+    }
+
+    function updateFlightStatus(address airline,string flight,uint256 timestamp,uint8 statusCode) external view{
+
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        // Update the flight status
+        flightStatuses[flightKey] = statusCode;
+
+        // Emit event to notify the status update
+        emit FlightStatusUpdated(flightKey, statusCode);
     }
 
 
@@ -214,7 +227,7 @@ contract FlightSuretyData {
     /**
      *  @dev Credits payouts to insurees
     */
-    function creditInsurees(address airline, string flight, uint256 timestamp) external requireIsOperational() {
+    function creditInsurees(address airline, string flight, uint256 timestamp) external payable requireIsOperational() {
         // Generate the flight key
         bytes32 flightKey = getFlightKey(airline, flight, timestamp);
 
@@ -298,7 +311,5 @@ contract FlightSuretyData {
     {
         fund();
     }
-
-
 }
 

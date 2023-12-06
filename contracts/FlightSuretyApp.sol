@@ -5,6 +5,7 @@ pragma solidity ^0.4.25;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./FlightSuretyData.sol";
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
@@ -23,8 +24,11 @@ contract FlightSuretyApp {
     uint8 private constant STATUS_CODE_LATE_WEATHER = 30;
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
+    uint8 private constant DELAYED_FLIGHT_STATUS_CODE = 50;
 
     address private contractOwner;          // Account used to deploy contract
+
+    FlightSuretyData private flightSuretyData;      //reference to flightSuretyData
 
     struct Flight {
         bool isRegistered;
@@ -33,6 +37,7 @@ contract FlightSuretyApp {
         address airline;
     }
     mapping(bytes32 => Flight) private flights;
+    mapping(bytes32 => Flight) private registeredFlights;
 
 
     address[] public registeredAirlines;
@@ -78,10 +83,15 @@ contract FlightSuretyApp {
     */
     constructor
                                 (
+                                    address dataContract
                                 ) 
                                 public 
     {
         contractOwner = msg.sender;
+
+        address address1 = address(dataContract);
+
+        flightSuretyData = FlightSuretyData(address1);
     }
 
     /********************************************************************************************/
@@ -105,39 +115,24 @@ contract FlightSuretyApp {
     * @dev Add an airline to the registration queue
     *
     */   
-    function registerAirline(address airlineAddress) public requireIsOperational() requireContractOwner() returns(bool success, uint256 votescount)
+    function registerAirline(address airlineAddress) public requireIsOperational() requireContractOwner()
     {
-        
-
-        return (false, 0);
+        // Call the registerAirline function in FlightSuretyData contract
+        FlightSuretyData(address(flightSuretyData)).registerAirline(airlineAddress);
 
     }
 
-    
-    function getVoteCount(address airlineAddress) internal view returns (uint256) {
-        uint256 count = 0;
-        for (uint256 i = 0; i < registeredAirlines.length; i++) {
-            if (votes[registeredAirlines[i]]) {
-                count++;
-            }
-        }
-        return count;
-    }
 
-    event AirlineRegistered(address airlineAddress);
+    //event AirlineRegistered(address airlineAddress);
 
 
    /**
     * @dev Register a future flight for insuring.
     *
     */  
-    function registerFlight
-                                (
-                                )
-                                external
-                                pure
-    {
-
+    function registerFlight(address airline, string flight, uint256 timestamp) external {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        registeredFlights[flightKey] = Flight(true, STATUS_CODE_UNKNOWN, timestamp, airline);   
     }
     
    /**
@@ -154,6 +149,14 @@ contract FlightSuretyApp {
                                 internal
                                 pure
     {
+        // Check if the flight is delayed due to an airline fault
+        if (statusCode == DELAYED_FLIGHT_STATUS_CODE) {
+            // Credit the passengers
+            FlightSuretyData(address(flightSuretyData)).creditInsurees(airline, flight, timestamp);
+
+            // Update the flight status
+            FlightSuretyData(address(flightSuretyData)).updateFlightStatus(airline, flight, timestamp, statusCode);
+        }
     }
 
 
