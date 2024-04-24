@@ -3,14 +3,14 @@ const FlightSuretyData = artifacts.require("FlightSuretyData");
 const fs = require('fs');
 
 module.exports = function(deployer) {
-    deployer.deploy(FlightSuretyData).then(() => {
-        return deployer.deploy(FlightSuretyApp, FlightSuretyData.address)
-        .then(() => {
+    deployer.deploy(FlightSuretyData).then((data) => {
+        return deployer.deploy(FlightSuretyApp, data.address)  // Pass the correct address of the deployed data contract
+        .then((app) => {
             let config = {
                 localhost: {
                     url: 'http://localhost:8545',
-                    dataAddress: FlightSuretyData.address,
-                    appAddress: FlightSuretyApp.address
+                    dataAddress: data.address,  // Use the instance address
+                    appAddress: app.address    // Use the instance address
                 }
             };
             fs.writeFileSync(__dirname + '/../src/dapp/config.json', JSON.stringify(config, null, '\t'), 'utf-8');

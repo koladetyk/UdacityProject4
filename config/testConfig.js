@@ -24,11 +24,14 @@ var Config = async function(accounts) {
     let firstAirline = accounts[1];
 
     let flightSuretyData = await FlightSuretyData.new();
-    let flightSuretyApp = await FlightSuretyApp.new();
+    let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address);
 
     // Set the contract owner address
-    let contractOwner = await flightSuretyData.contractOwner.call();
-    owner = contractOwner;
+    //let contractOwner = await flightSuretyData.contractOwner.call();
+    //owner = contractOwner;
+
+    // Authorize the FlightSuretyApp contract to call FlightSuretyData
+    await flightSuretyData.authorizeCaller(flightSuretyApp.address);
 
     
     return {

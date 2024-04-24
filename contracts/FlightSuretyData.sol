@@ -107,6 +107,11 @@ contract FlightSuretyData {
         _;
     }
 
+    modifier onlyOwner() {
+        require(msg.sender == contractOwner, "Caller is not the owner");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -174,6 +179,10 @@ contract FlightSuretyData {
 
         // Emit an event to indicate that the caller has been authorized
         emit CallerAuthorized(caller);
+    }
+
+    function deauthorizeCaller(address caller) external onlyOwner {
+        authorizedCallers[caller] = false;
     }
 
 
