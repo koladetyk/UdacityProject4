@@ -185,6 +185,10 @@ contract FlightSuretyData {
         authorizedCallers[caller] = false;
     }
 
+    function getCreditedAmount(address passenger) external view returns (uint256) {
+        return creditedAmounts[passenger];
+    }
+
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */

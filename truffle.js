@@ -1,17 +1,23 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-var mnemonic = "index basket praise envelope false piano fringe labor void long thought need";
+var mnemonic = "admit gather among animal trap soldier actor super state clever relief maze";
+var NonceTrackerSubprovider = require("web3-provider-engine/subproviders/nonce-tracker")
 
 module.exports = {
   networks: {
     development: {
-      networkCheckTimeout: 10000,
       host: "127.0.0.1",
       port: 7545,
       provider: function() {
-        return new HDWalletProvider(mnemonic, "http://127.0.0.1:7545/", 0, 50);
+        var wallet = new HDWalletProvider(mnemonic, "http://127.0.0.1:7545/")
+        var nonceTracker = new NonceTrackerSubprovider()
+        wallet.engine._providers.unshift(nonceTracker)
+        nonceTracker.setEngine(wallet.engine)
+        return wallet
+        //return new HDWalletProvider(mnemonic, "http://127.0.0.1:7545/", 0, 50);
       },
       network_id: '5777',
-      gas: 6721975
+      gas: 2000000,   // <--- Twice as much
+      gasPrice: 10000000000,
     }
   },
   compilers: {

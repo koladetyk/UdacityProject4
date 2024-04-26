@@ -106,6 +106,12 @@ contract FlightSuretyApp {
         return true;  // Modify to call data contract's status
     }
 
+    function isFlightRegistered(address airline, string memory flight, uint256 timestamp) public view returns(bool) {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        return registeredFlights[flightKey].isRegistered;
+    }
+
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -223,6 +229,7 @@ contract FlightSuretyApp {
     // Oracles track this and if they have a matching index
     // they fetch data and submit a response
     event OracleRequest(uint8 index, address airline, string flight, uint256 timestamp);
+    event OracleResponseProcessed(address indexed oracle, bytes32 indexed key, uint8 statusCode, bool success);
 
 
     // Register an oracle with the contract
@@ -280,10 +287,14 @@ contract FlightSuretyApp {
 
         oracleResponses[key].responses[statusCode].push(msg.sender);
 
-        // Information isn't considered verified until at least MIN_RESPONSES
         // oracles respond with the *** same *** information
         emit OracleReport(airline, flight, timestamp, statusCode);
-        if (oracleResponses[key].responses[statusCode].length >= MIN_RESPONSES) {
+
+        bool isConsensusReached = oracleResponses[key].responses[statusCode].length >= MIN_RESPONSES;
+        emit OracleResponseProcessed(msg.sender, key, statusCode, isConsensusReached);
+
+        
+        if (isConsensusReached) {
 
             emit FlightStatusInfo(airline, flight, timestamp, statusCode);
 
