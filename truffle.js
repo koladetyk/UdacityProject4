@@ -1,5 +1,5 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-var mnemonic = "admit gather among animal trap soldier actor super state clever relief maze";
+var mnemonic = "wasp type cash hair barely bleak approve convince drum sing uncle obscure";
 var NonceTrackerSubprovider = require("web3-provider-engine/subproviders/nonce-tracker")
 
 module.exports = {

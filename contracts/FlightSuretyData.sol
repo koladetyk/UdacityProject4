@@ -279,12 +279,12 @@ contract FlightSuretyData {
     */
     function pay() external {
         // Get the payout amount for the caller (insured passenger)
-        //uint256 payoutAmount = payouts[msg.sender];
+        uint256 payoutAmount = payouts[msg.sender];
 
         // Ensure that the payout amount is greater than zero
         require(payoutAmount > 0, "No payout available for the caller");
 
-        uint256 payoutAmount = payouts[msg.sender];
+        //uint256 payoutAmount = payouts[msg.sender];
         creditedAmounts[msg.sender] = 0; // Reset the credited amount before transferring to avoid re-entrancy issues
 
         msg.sender.transfer(payoutAmount);
