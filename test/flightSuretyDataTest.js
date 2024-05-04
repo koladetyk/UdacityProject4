@@ -116,27 +116,23 @@ contract('FlightSuretyData', (accounts) => {
         const flight = "ND1309";
         const timestamp = Math.floor(Date.now() / 1000);
         const insuranceAmount = web3.utils.toWei("1", "ether");
-    
         // Passenger buys insurance
-        await flightSuretyData.buy(airline, flight, timestamp, { from: passenger, value: insuranceAmount });
-    
+        await flightSuretyData.buy(airline, flight, timestamp).send({ from: passenger, value: insuranceAmount });
         // Trigger credit for insurees
-        await flightSuretyData.creditInsurees(airline, flight, timestamp);
-    
+        await flightSuretyData.creditInsurees(airline, flight, timestamp).send({ from: passenger });
         // Check if the passenger is credited before making a payout
-        let creditedAmount = await flightSuretyData.getCreditedAmount(passenger);
-        console.log("Credited amount before payout:", web3.utils.fromWei(creditedAmount.toString(), 'ether'));
+        let creditedAmount = await flightSuretyData.getCreditedAmount(passenger).call();
+        console.log(`Credited amount before payout: `, web3.utils.fromWei(creditedAmount, 'ether'));
         assert(creditedAmount.toString() !== '0', "Insuree should be credited before payout");
-    
         // Payout
         const initialBalance = new web3.utils.BN(await web3.eth.getBalance(passenger));
-        await flightSuretyData.pay({ from: passenger });
-    
+        await flightSuretyData.pay(passenger).send({ from: passenger });
         // Verify if the payout was successful
         const finalBalance = new web3.utils.BN(await web3.eth.getBalance(passenger));
         const expectedPayout = new web3.utils.BN(creditedAmount);
         assert(finalBalance.sub(initialBalance).eq(expectedPayout), "Payout was not processed correctly");
-    });    
+      });
+    
     
     
     it('ensures that payouts are made correctly', async () => {

@@ -7,14 +7,13 @@ contract('Flight Surety Tests', async (accounts) => {
 
     before('setup contract', async () => {
         config = await Test.Config(accounts);
-        await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
-
-        // Setup and register the oracle
+        await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address, { from: accounts[0] });
+    
         anOracle = accounts[2];
-        // Ensure the oracle has enough ether to pay for the registration fee if required
         await web3.eth.sendTransaction({from: accounts[0], to: anOracle, value: web3.utils.toWei("1.5", "ether")});
         await config.flightSuretyApp.registerOracle({from: anOracle, value: web3.utils.toWei("1", "ether")});
     });
+    
 
     it('has correct initial isOperational() value', async function () {
         // Check if the data contract is operational
