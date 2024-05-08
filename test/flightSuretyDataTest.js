@@ -134,7 +134,7 @@ contract('FlightSuretyData', (accounts) => {
         // Payout
         const initialBalance = new web3.utils.BN(await web3.eth.getBalance(passenger));
         console.log(`initialBalance `+initialBalance);
-        await flightSuretyData.pay({ from: passenger });
+        await flightSuretyData.pay.sendTransaction({ from: passenger });
         console.log(`got here `);
 
         // Verify if the payout was successful
