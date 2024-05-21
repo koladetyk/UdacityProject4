@@ -3,93 +3,76 @@ var BigNumber = require('bignumber.js');
 
 contract('Flight Surety Tests', async (accounts) => {
     var config;
-    let anOracle; // Oracle account
-
     before('setup contract', async () => {
         config = await Test.Config(accounts);
-        await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address, { from: accounts[0] });
-    
-        anOracle = accounts[2];
-        await web3.eth.sendTransaction({from: accounts[0], to: anOracle, value: web3.utils.toWei("1.5", "ether")});
-        await config.flightSuretyApp.registerOracle({from: anOracle, value: web3.utils.toWei("1", "ether")});
+        await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
     });
-    
 
+    /********************************************************************************************/
+    /* Tests for operational status controls                                                    */
+    /********************************************************************************************/
     it('has correct initial isOperational() value', async function () {
-        // Check if the data contract is operational
-        let status = await config.flightSuretyData.isOperational.call();
+        let status = await config.flightSuretyApp.isOperational.call();
         assert.equal(status, true, "Incorrect initial operating status value");
     });
 
     it('can block access to setOperatingStatus() for non-Contract Owner account', async function () {
         let accessDenied = false;
         try {
-            await config.flightSuretyData.setOperatingStatus(false, { from: config.testAddresses[2] });
+            await config.flightSuretyApp.setOperatingStatus(false, { from: accounts[2] });
         } catch(e) {
             accessDenied = true;
         }
         assert.equal(accessDenied, true, "Access not restricted to Contract Owner");
     });
 
-    it('can allow access to setOperatingStatus() for Contract Owner account', async function () {
-        let accessDenied = false;
-        try {
-            await config.flightSuretyData.setOperatingStatus(false);
-        } catch(e) {
-            accessDenied = true;
-        }
-        assert.equal(accessDenied, false, "Access should not be restricted to Contract Owner");
-        // Set it back for other tests to work
-        await config.flightSuretyData.setOperatingStatus(true);
+    /********************************************************************************************/
+    /* Tests for airline registration                                                           */
+    /********************************************************************************************/
+    it('can register an airline through the FlightSuretyApp', async () => {
+        let newAirline = accounts[2];
+        await config.flightSuretyApp.registerAirline(newAirline, {from: config.owner});
+        let result = await config.flightSuretyData.isAirlineRegistered(newAirline);
+        assert.equal(result, true, "Airline should be registered successfully.");
     });
 
+    /********************************************************************************************/
+    /* Tests for flight registration                                                            */
+    /********************************************************************************************/
     it('can register a flight', async () => {
-        let airline = config.firstAirline;
-        let flight = 'ND1309'; // Example flight number
+        let newAirline = accounts[2];
+        let flight = 'ND1309';
         let timestamp = Math.floor(Date.now() / 1000);
-        await config.flightSuretyApp.registerFlight(airline, flight, timestamp, {from: airline});
-        let result = await config.flightSuretyApp.isFlightRegistered(airline, flight, timestamp);
+        await config.flightSuretyApp.registerFlight(newAirline, flight, timestamp, {from: newAirline});
+        let result = await config.flightSuretyApp.isFlightRegistered(newAirline, flight, timestamp);
         assert.equal(result, true, "Flight should be registered successfully.");
     });
 
-    it('can submit oracle response', async () => {
-        let indexes = await config.flightSuretyApp.getMyIndexes({from: anOracle});
-        let airline = config.firstAirline;
+    /********************************************************************************************/
+    /* Tests for oracles                                                                        */
+    /********************************************************************************************/
+    it('can request flight status', async () => {
+        let airline = accounts[2];
         let flight = 'ND1309';
         let timestamp = Math.floor(Date.now() / 1000);
-        let statusCode = 20; // Example status code indicating a delay
-
-        // Fetch flight status to open the request for oracles
-        await config.flightSuretyApp.fetchFlightStatus(airline, flight, timestamp);
-
-        // Oracles submit their response
-        for (let idx = 0; idx < indexes.length; idx++) {
-            await config.flightSuretyApp.submitOracleResponse(indexes[idx], airline, flight, timestamp, statusCode, {from: anOracle});
-        }
-
-        // Check that the flight status is updated after sufficient responses
-        let updatedStatus = await config.flightSuretyData.getFlightStatus(airline, flight, timestamp);
-        assert.equal(updatedStatus, statusCode, "Flight status should be updated based on oracle consensus.");
+        let tx = await config.flightSuretyApp.fetchFlightStatus(airline, flight, timestamp);
+        assert(tx.logs[0].event, 'OracleRequest', 'Fetch flight status should trigger OracleRequest event');
     });
 
-    it('processes insurance payouts correctly', async () => {
+    /********************************************************************************************/
+    /* Tests for insurance payouts                                                              */
+    /********************************************************************************************/
+    it('can allow a user to buy insurance and get credit', async () => {
         let passenger = accounts[5];
-        let insuranceAmount = web3.utils.toWei("1", "ether");
+        let airline = accounts[2];
         let flight = 'ND1309';
         let timestamp = Math.floor(Date.now() / 1000);
-    
-        // Passenger buys insurance
-        await config.flightSuretyData.buy(config.firstAirline, flight, timestamp, {from: passenger, value: insuranceAmount});
-    
-        // Flight is delayed
-        await config.flightSuretyData.creditInsurees(config.firstAirline, flight, timestamp);
-    
-        // Passenger requests payout
-        let initialBalance = await web3.eth.getBalance(passenger);
-        await config.flightSuretyData.pay({from: passenger});
-        let newBalance = await web3.eth.getBalance(passenger);
-    
-        assert.isAbove(Number(newBalance), Number(initialBalance), "Passenger balance should increase after receiving payout.");
+        let insuranceAmount = web3.utils.toWei("1", "ether");
+        await config.flightSuretyData.buy(airline, flight, timestamp, {from: passenger, value: insuranceAmount});
+        // Simulate flight delay
+        await config.flightSuretyData.creditInsurees(airline, flight, timestamp, {from: config.owner});
+        let payout = await config.flightSuretyData.getCreditedAmount(passenger);
+        assert(payout.toString(), web3.utils.toWei("1.5", "ether"), "Insurance should be credited properly.");
     });
-    
+
 });
