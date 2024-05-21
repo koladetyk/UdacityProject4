@@ -119,6 +119,7 @@ contract('FlightSuretyData', (accounts) => {
             timestamp++; // Adjust timestamp to ensure it is even and thus triggers a delay
         }
         const insuranceAmount = web3.utils.toWei("1", "ether");
+         
         // Passenger buys insurance
         await flightSuretyData.buy.sendTransaction(airline, flight, timestamp, { from: passenger, value: insuranceAmount });
         // Trigger credit for insurees

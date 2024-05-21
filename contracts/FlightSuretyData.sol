@@ -70,7 +70,7 @@ contract FlightSuretyData {
     event AirlineFunded(address airline, uint256 fundingAmount);
     event CallerAuthorized(address caller);
     event FlightStatusUpdated(bytes32 flightKey, uint8 statusCode);
-    event DebugLog(string message);
+    event DebugLog(string message, uint256 value);
     event ConsensusVoteReceived(address airline, address voter);
     
 
@@ -281,13 +281,15 @@ contract FlightSuretyData {
     */
     function pay() external {
         uint256 payoutAmount = creditedAmounts[msg.sender]; // Use creditedAmounts instead
-        //require(payoutAmount > 0, "No payout available for the caller");
-        //console.log('1');
+        emit DebugLog("Trying to pay", payoutAmount); // Debug output
+
+        require(payoutAmount > 0, "No payout available for the caller");
 
         creditedAmounts[msg.sender] = 0; // Reset the credited amount before transferring
         //console.log("2");
         msg.sender.transfer(payoutAmount);
         //console.log("3");
+        emit DebugLog("Payment successful", payoutAmount);
         emit PayoutMade(msg.sender, payoutAmount);
     }
 
