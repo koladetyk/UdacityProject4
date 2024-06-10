@@ -4,10 +4,9 @@ const mnemonic = "rival empower awake poet captain core bracket swing ball offic
 module.exports = {
   networks: {
     development: {
-      provider: () => new HDWalletProvider(mnemonic, "http://127.0.0.1:7545/"),
-      network_id: '5777',
-      gas: 10000000,
-      gasPrice: 20000000000
+      host: "127.0.0.1",
+      port: 8545,
+      network_id: "*" // Match any network id
     }
   },
   compilers: {

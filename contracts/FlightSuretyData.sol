@@ -89,8 +89,8 @@ contract FlightSuretyData {
     */
     modifier requireIsOperational() 
     {
-        //require(operational, "Contract is currently not operational");
-        _;  // All modifiers require an "_" which indicates where the function body will be added
+        require(operational, "Contract is currently not operational");
+        _; 
     }
 
     /**
@@ -98,17 +98,17 @@ contract FlightSuretyData {
     */
     modifier requireContractOwner()
     {
-        //require(msg.sender == contractOwner, "Caller is not contract owner");
+        require(msg.sender == contractOwner, "Caller is not contract owner");
         _;
     }
 
     modifier requireAuthorizedCaller() {
-        //require(authorizedCallers[msg.sender], "Caller is not authorized");
+        require(authorizedCallers[msg.sender], "Caller is not authorized");
         _;
     }
 
     modifier onlyOwner() {
-        //require(msg.sender == contractOwner, "Caller is not the owner");
+        require(msg.sender == contractOwner, "Caller is not the owner");
         _;
     }
 
