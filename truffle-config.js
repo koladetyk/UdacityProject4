@@ -1,5 +1,7 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const mnemonic = "rival empower awake poet captain core bracket swing ball office spend decade";
+require('dotenv').config(); // Load environment variables from .env
+
+const mnemonic = process.env.MNEMONIC;
 
 module.exports = {
   networks: {
