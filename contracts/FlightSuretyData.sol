@@ -256,22 +256,19 @@ contract FlightSuretyData {
     /**
      *  @dev Credits payouts to insurees
     */
-    function creditInsurees(address airline, string flight, uint256 timestamp) external requireIsOperational() {
-        // Generate the flight key
+    function creditInsurees(address airline, string memory flight, uint256 timestamp) public requireIsOperational {
         bytes32 flightKey = getFlightKey(airline, flight, timestamp);
-
-        // Retrieve the insurance details for the flight
         Insurance storage insurance = flightInsurances[flightKey];
-
-        // Check if the flight is delayed due to airline fault
-        if(isFlightDelayed(airline, flight, timestamp) && !insurance.claimed) {
-            uint256 creditAmount = insurance.amount.mul(150).div(100);  // 1.5x of the insured amount
+        
+        // Check if the flight delay logic is correctly implemented and triggered
+        if (!insurance.claimed && isFlightDelayed(airline, flight, timestamp)) {
+            uint256 creditAmount = insurance.amount.mul(150).div(100);
             creditedAmounts[insurance.passenger] = creditedAmounts[insurance.passenger].add(creditAmount);
-            //payouts[insurance.passenger] = payouts[insurance.passenger].add(creditAmount); // Update payout amount
-            insurance.claimed = true; // Mark as claimed to prevent re-crediting
+            insurance.claimed = true; // Prevent double crediting
             emit InsuranceCredited(insurance.passenger, airline, flight, timestamp, creditAmount);
         }
     }
+
 
     
 
@@ -280,18 +277,14 @@ contract FlightSuretyData {
      *
     */
     function pay() external {
-        uint256 payoutAmount = creditedAmounts[msg.sender]; // Use creditedAmounts instead
-        emit DebugLog("Trying to pay", payoutAmount); // Debug output
+        uint256 payoutAmount = creditedAmounts[msg.sender];
+        require(payoutAmount > 0, "No payout available");
 
-        require(payoutAmount > 0, "No payout available for the caller");
-
-        creditedAmounts[msg.sender] = 0; // Reset the credited amount before transferring
-        //console.log("2");
-        msg.sender.transfer(payoutAmount);
-        //console.log("3");
-        emit DebugLog("Payment successful", payoutAmount);
-        emit PayoutMade(msg.sender, payoutAmount);
+        creditedAmounts[msg.sender] = 0; // Reset before sending to prevent re-entrancy issues
+        msg.sender.transfer(payoutAmount); // Use transfer for 0.4.25
     }
+
+
 
 
    /**
