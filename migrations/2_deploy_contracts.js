@@ -6,4 +6,5 @@ module.exports = async function(deployer) {
   const flightSuretyData = await FlightSuretyData.deployed();
 
   await deployer.deploy(FlightSuretyApp, flightSuretyData.address);
+  
 };
