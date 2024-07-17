@@ -3,7 +3,7 @@ import app from './server';
 
 const server = http.createServer(app);
 let currentApp = app;
-server.listen(3002); 
+server.listen(3003, () => console.log('Server running on port 3003'));
 
 if (module.hot) {
     module.hot.accept('./server', () => {
