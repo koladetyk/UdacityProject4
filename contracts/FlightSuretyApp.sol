@@ -304,6 +304,28 @@ contract FlightSuretyApp {
     }
 
 
+    function buyInsurance(address airline, string memory flight, uint256 timestamp) public payable {
+        flightSuretyData.buy.value(msg.value)(airline, flight, timestamp);
+    }
+
+    function fundAirline() public payable {
+        flightSuretyData.fund.value(msg.value)();
+    }
+
+    function payInsurance() public {
+        flightSuretyData.pay(); 
+    }
+
+
+    function creditInsurees(address airline, string memory flight, uint256 timestamp) public {
+        flightSuretyData.creditInsurees(airline, flight, timestamp);
+    }
+
+
+
+
+
+
     function getFlightKey
                         (
                             address airline,

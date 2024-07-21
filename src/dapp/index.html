@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -8,26 +7,64 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
-
 <body>
-
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
         <a class="navbar-brand" href="#">FlightSurety</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
-            aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
     </nav>
 
-    <main class="container">
-
-        <div id="display-wrapper" class="top-20">
+    <main class="container mt-5 pt-5">
+        <div id="operation-status" class="section">
+            <h2>Operational Status</h2>
+            <p>Check if contract is operational</p>
+            <span id="operational-status-value"></span>
         </div>
-        <div class="row top-20">
-            <label class="form">Flight</label> <input type="text" id="flight-number"> <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+
+        <div id="airline" class="section">
+            <h2>Airline</h2>
+            <input type="text" id="airline-address-register" placeholder="Airline (address)">
+            <button id="register-airline-btn">Register Airline</button>
+            <input type="text" id="airline-address-fund" placeholder="Airline (address)">
+            <input type="number" id="fund-amount" placeholder="Amount">
+            <button id="fund-airline-btn">Fund Seed Money</button>
+        </div>
+
+        <div id="flights" class="section">
+            <h2>Flight</h2>
+            <input type="text" id="airline-address-flight" placeholder="Airline Address">
+            <input type="text" id="flight-number" placeholder="Flight Number">
+            <input type="date" id="flight-timestamp" placeholder="Timestamp">
+            <button id="register-flight-btn">Register Flight</button>
+        </div>
+        
+        <div id="purchase-insurance" class="section">
+            <h2>Purchase Insurance</h2>
+            <input type="text" id="insurance-airline-address" placeholder="Airline Address">
+            <input type="text" id="insurance-flight" placeholder="Flight">
+            <input type="date" id="insurance-timestamp">
+            <input type="number" id="insurance-amount" placeholder="Insurance Amount">
+            <button id="buy-insurance">Buy Insurance</button>
+        </div>
+
+        <div id="claim-insurance" class="section">
+            <h2>Claim Insurance</h2>
+            <input type="text" id="claim-airline-address" placeholder="Airline Address">
+            <input type="text" id="claim-flight" placeholder="Flight">
+            <input type="date" id="claim-timestamp">
+            <button id="claim-insurance">Claim</button>
+        </div>
+        
+        <div id="oracles" class="section">
+            <h2>Oracles</h2>
+            <select id="oracle-flight">
+                <option>Select Flight for Status</option>
+            </select>
+            <button id="submit-oracle">Submit to Oracles</button>
         </div>
     </main>
 
+    <script src="index.js"></script>
 </body>
-
 </html>

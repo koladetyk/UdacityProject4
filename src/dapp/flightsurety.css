@@ -1,42 +1,38 @@
 body {
-    background-image: url('flight.jpg'); /* Source: iStockPhoto */
-    background-repeat: no-repeat;
+    background-image: url('flight.jpg'); /* Ensure the path to your image is correct */
     background-size: cover;
+    color: #fff;
 }
 
 .container {
-    margin-top: 400px;
-    background-color: #000;
-    opacity: 0.9;
-    color: #fff;
-    padding: 40px;
+    background-color: transparent; /* Ensures the container doesn't have its own background */
+    padding: 20px;
 }
 
-.top-20 {
-    margin-top: 20px;
+.section {
+    background-color: rgba(0, 0, 0, 0.8); /* Adding transparency */
+    color: white;
+    padding: 20px;
+    margin-bottom: 30px; /* Adds space between sections */
 }
-
-h5 {
-    color: #999999;
+.section h2 {
+    background-color: #333; /* Dark background for headers */
+    padding: 10px;
+    border-radius: 5px;
 }
-
-section {
-    margin-bottom: 50px;
+input, select, button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
 }
-
-.field {
-    font-weight: bold;
-    text-align: right;
+button {
+    background-color: #28a745; /* Bootstrap green */
+    color: white;
+    font-size: 16px;
 }
-
-.field-value {
-    color: #0e7fa8;
-}
-
-label.form {
-    font-size: 14px;
-    margin-right: 20px;
-}
-input {
-    margin-right: 30px;
+input, select {
+    background-color: #fff;
+    color: #333;
 }

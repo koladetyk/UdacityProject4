@@ -1,5 +1,5 @@
 const FlightSuretyData = artifacts.require('FlightSuretyData');
-contract('FlightSuretyData', (accounts) => {
+contract('FlightSuretyDataTest ', (accounts) => {
     let flightSuretyData;
     const owner = accounts[0];
     const firstAirline = accounts[1];
