@@ -17,7 +17,7 @@ export default class Contract {
         this.web3.eth.getAccounts((error, accts) => {
             if (error) {
                 console.error("Error fetching accounts", error);
-                return;  // Early exit on error
+                return;
             }
 
             this.owner = accts[0];
@@ -52,21 +52,19 @@ export default class Contract {
         }
     }
 
-    isOperational(callback = () => {}) {
-        console.log("Checking if the contract is operational...");
-        this.flightSuretyApp.methods.isOperational()
-            .call({ from: this.owner }, (error, result) => {
-                if (error) {
-                    console.error("Error in isOperational call", error);
-                } else {
-                    console.log("Operational Status:", result);
-                }
-                if (typeof callback === 'function') {
-                    callback(error, result);
-                } else {
-                    console.error('Callback provided is not a function');
-                }
-            });
+    isOperational() {
+        return new Promise((resolve, reject) => {
+            this.flightSuretyApp.methods.isOperational()
+                .call({ from: this.owner }, (error, result) => {
+                    if (error) {
+                        console.error("Error in isOperational call", error);
+                        reject(error);
+                    } else {
+                        console.log("Operational Status:", result);
+                        resolve(result);
+                    }
+                });
+        });
     }
 
     async authorizeCaller(userAddress) {
@@ -104,7 +102,7 @@ export default class Contract {
             console.log("Airline registered:", result);
             return result;
         } catch (error) {
-            console.error("Error registering airline:", error);
+            console.error("Error registering airline :", error);
             throw error;
         }
     }
@@ -124,7 +122,7 @@ export default class Contract {
     async buyInsurance(airline, flight, timestamp, amount) {
         let valueWei = this.web3.utils.toWei(amount.toString(), "ether");
         try {
-            const result = await this.flightSuretyApp.methods.buy(airline, flight, timestamp)
+            const result = await this.flightSuretyApp.methods.buyInsurance(airline, flight, timestamp)
                 .send({ from: this.owner, value: valueWei, gas: 4712388, gasPrice: 100000000000 });
             console.log("Insurance purchased:", result);
             return result;
@@ -133,6 +131,8 @@ export default class Contract {
             throw error;
         }
     }
+
+
 
     async claimInsurance(airline, flight, timestamp) {
         try {
